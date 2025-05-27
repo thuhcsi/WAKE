@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="WAKE: Watermarking Audio with Key Enrichment">
+  <meta name="keywords" content="Speech Editing, Zero-shot TTS, Neural Codec Language Models">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WAKE</title>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-L7749G0HJZ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-L7749G0HJZ');
+</script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-body" style="padding-bottom: 24px;">
+    <div class="container  is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">WAKE: Watermarking Audio with Key Enrichment</h1>
+         
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<style>
+  .custom-links {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
+  }
+  
+  .custom-link {
+    color: #ff6600;
+    font-size: 1.3rem;
+    font-weight: bold;
+    padding: 0.5em 1.5em;
+    border-radius: 0.5em;
+    text-decoration: none;
+    border: 2px solid #ff6600;
+    background: #fff3e0;
+    transition: background 0.2s, color 0.2s;
+  }
+  
+  .custom-link:hover {
+    background: #ff6600;
+    color: #fff;
+  }
+  </style>
+
+
+<section id="abs" class="section" style="padding-top: 0px;">
+  <div class="container  is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">TL;DR</h2>
+        <div class="content has-text-justified">
+          <p>
+                <b>WAKE</b> is the first <b>key-controllable</b> audio watermark framework, which aims to embed watermarks into audio and decode the embedded watermarks using specific keys, as shown in the following Figure. 
+                If an incorrect key is used, it will be impossible to decode the correct watermark, substantially enhancing the watermarking system's security and scalability while also fulfilling personalized watermarks. 
+                Notably, WAKE can achieve multiple watermark embeddings and corresponding watermark decoding based on the key used during embedding. WAKE outperforms the current state-of-the-art audio watermarking models in watermarked audio quality and decoding performance.
+          </p>
+        </div>
+        <div class="custom-links">
+          <a class="custom-link" href="static/appendix/wake_appendix.pdf" target="_blank">More Results</a>
+          <a class="custom-link" href="https://github.com/xuyaoxun/WAKE" target="_blank">Code</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="hero teaser">
+  <div class="container is-max-desktop is-centered has-text-centered">
+    <div class="hero-body">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">WAKE's overall process</h2>
+          <img src="./static/images/fig1.png" class="interpolation-image"
+            alt="Interpolate start reference image." />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="toc" class="section" style="padding-top: 0px;">
+  <div class="container  is-fluid">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Table of Contents</h2>
+        <div class="is-centered">
+          <h3>Watermarked Audio Sample with different types of audio</h3>
+          <ul>
+            <li><a href="#indataset"><b>Tests on the dataset used</b>: Sampled from the test dataset</a></li>
+
+            <li><a href="#other"><b>Tests on the dataset unused</b>: Sampled from outside the train/test dataset</a></li>
+          </ul>
+
+          <h3>Multiple watermark embedding with different types of audio</h3>
+          <ul>
+            <li><a href="#t_librispeech"><b>different Watermark Times</b>: Watermarked Audio with different Watermark Times(English Speech)</a></li>
+            <li><a href="#t_fma"><b>different Watermark Times</b>: Watermarked Audio with different Watermark Times (music)</a></li>
+            <li><a href="#fig_times"><b>spectrogram</b>: spectrogram of different watermark embedding times</a></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+
+<hr>
+
+<section id="indataset" class="hero is-light ">
+  <div class="hero-body">
+    <div class="container is-fluid">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Tests on the dataset used</h2>
+          <div class="content">
+            <p>We randomly selected a few from the test set of the dataset used.</a></p> 
+          </div>
+        </div>
+      </div>
+      <div class="columns is-centered has-text-centered">
+        <table class="table" style="background-color: transparent;">
+          <thead>
+            <tr>
+              <th><strong></strong></th>
+              <th><strong>LibriSpeech</strong></th>
+              <th><strong>FMA</strong></th>
+              <th><strong>AudioSet</strong></th>
+              <th><strong>CommonVoice</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Origin Audio</strong></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset2/0/1.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset3/0/1.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset1/0/1.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset4/0/1.wav" type="audio/wav"></audio></td>
+
+            </tr>
+            <tr>
+              <td><strong>AudioSeal (single watermark)</strong></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset2/0/2.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset3/0/2.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset1/0/2.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset4/0/2.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td><strong>WavMark (single watermark)</strong></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset2/0/3.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset3/0/3.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset1/0/3.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset4/0/3.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td><strong>WAKE(proposed) (single watermark)</strong></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset2/0/4.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset3/0/4.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset1/0/4.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset4/0/4.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td><strong>AudioSeal (double watermark)</strong></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset2/0/5.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset3/0/5.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset1/0/5.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset4/0/5.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td><strong>WavMark (double watermark)</strong></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset2/0/6.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset3/0/6.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset1/0/6.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset4/0/6.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td><strong>WAKE(proposed) (double watermark)</strong></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset2/0/7.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset3/0/7.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset1/0/7.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset4/0/7.wav" type="audio/wav"></audio></td>
+            </tr>
+
+            
+
+          </tbody>
+        </table>
+      </div>
+              <div class="columns is-centered has-text-centered">
+                <div class="column is-four-fifths">
+                  <a href="#toc" class="button is-primary">Go Back to Table of Contents</a>
+                </div>
+              </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+
+<section id="other" class="hero is-light ">
+  <div class="hero-body">
+    <div class="container is-fluid">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Other Data</h2>
+          <div class="content">
+            <p>Sampled from outside the train/test dataset.</a></p> 
+          </div>
+        </div>
+      </div>
+      <div class="columns is-centered has-text-centered">
+        <table class="table" style="background-color: transparent;">
+          <thead>
+            <tr>
+              <th><strong></strong></th>
+              <th><strong>Sample 1</strong></th>
+              <th><strong>Sample 2</strong></th>
+              <th><strong>Sample 3</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Origin Audio</strong></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/0/1.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/1/1.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/2/1.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td><strong>AudioSeal (single watermark)</strong></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/0/2.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/1/2.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/2/2.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td><strong>WavMark (single watermark)</strong></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/0/3.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/1/3.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/2/3.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td><strong>WAKE(proposed) (single watermark)</strong></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/0/4.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/1/4.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/2/4.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td><strong>AudioSeal (double watermark)</strong></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/0/5.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/1/5.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/2/5.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td><strong>WavMark (double watermark)</strong></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/0/6.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/1/6.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/2/6.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td><strong>WAKE(proposed) (double watermark)</strong></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/0/7.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/1/7.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/dataset5/2/7.wav" type="audio/wav"></audio></td>
+            </tr>
+
+            
+
+          </tbody>
+        </table>
+      </div>
+              <div class="columns is-centered has-text-centered">
+                <div class="column is-four-fifths">
+                  <a href="#toc" class="button is-primary">Go Back to Table of Contents</a>
+                </div>
+              </div>
+    </div>
+  </div>
+</section>
+
+
+<hr>
+
+
+
+<section id="t_librispeech" class="hero is-light ">
+  <div class="hero-body">
+    <div class="container is-fluid">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Watermarked Audio with different Watermark Times(English Speech)</h2>
+          <div class="content">
+            <p>In this experiment, we add different watermarks to a piece of audio sampled from LibriSpeech using AudioSeal, WavMark and WAKE(proposed) several times.</a></p> 
+          </div>
+        </div>
+      </div>
+      <div class="columns is-centered has-text-centered">
+        <table class="table" style="background-color: transparent;">
+          <thead>
+            <tr>
+              <th><strong></strong></th>
+              <th><strong>Origin Audio</strong></th>
+              <th><strong>1</strong></th>
+              <th><strong>2</strong></th>
+              <th><strong>5</strong></th>
+              <th><strong>10</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>AudioSeal</strong></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/2/origin.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/2/1/1.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/2/2/1.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/2/5/1.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/2/10/1.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td><strong>WavMark</strong></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/2/origin.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/2/1/2.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/2/2/2.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/2/5/2.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/2/10/2.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td><strong>WAKE(proposed)</strong></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/2/origin.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/2/1/3.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/2/2/3.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/2/5/3.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/2/10/3.wav" type="audio/wav"></audio></td>
+            </tr>
+            
+
+            
+
+          </tbody>
+        </table>
+      </div>
+              <div class="columns is-centered has-text-centered">
+                <div class="column is-four-fifths">
+                  <a href="#toc" class="button is-primary">Go Back to Table of Contents</a>
+                </div>
+              </div>
+    </div>
+  </div>
+</section>
+
+<section id="t_fma" class="hero is-light ">
+  <div class="hero-body">
+    <div class="container is-fluid">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Watermarked Audio with different Watermark Times (music)</h2>
+          <div class="content">
+            <p>In this experiment, we add different watermarks to a piece of audio sampled from FMA using AudioSeal, WavMark and WAKE(proposed) several times</a></p> 
+          </div>
+        </div>
+      </div>
+      <div class="columns is-centered has-text-centered">
+        <table class="table" style="background-color: transparent;">
+          <thead>
+            <tr>
+              <th><strong></strong></th>
+              <th><strong>Origin Audio</strong></th>
+              <th><strong>1</strong></th>
+              <th><strong>2</strong></th>
+              <th><strong>5</strong></th>
+              <th><strong>10</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>AudioSeal</strong></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/3/origin.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/3/1/1.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/3/2/1.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/3/5/1.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/3/10/1.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td><strong>WavMark</strong></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/3/origin.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/3/1/2.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/3/2/2.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/3/5/2.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/3/10/2.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td><strong>WAKE(proposed)</strong></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/3/origin.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/3/1/3.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/3/2/3.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/3/5/3.wav" type="audio/wav"></audio></td>
+              <td><audio controls=""><source src="static/audio_sample/demo/multi/3/10/3.wav" type="audio/wav"></audio></td>
+            </tr>
+            
+
+            
+
+          </tbody>
+        </table>
+      </div>
+              <div class="columns is-centered has-text-centered">
+                <div class="column is-four-fifths">
+                  <a href="#toc" class="button is-primary">Go Back to Table of Contents</a>
+                </div>
+              </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+<section id="fig_times" class="hero is-light ">
+  <div class="hero-body">
+    <div class="container is-fluid">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Specgram with watermark times</h2>
+          <div class="content">
+            <p>In this experiment, we add different watermarks to a piece of audio using AudioSeal, WavMark and WAKE(proposed) several times, and the spectrogram and audio are as follows.</a></p> 
+          </div>
+        </div>
+      </div>
+      <div class="columns is-centered has-text-centered">
+        <table class="table" style="background-color: transparent;">
+          <thead>
+            <tr>
+              <th><strong></strong></th>
+              <th><strong>AudioSeal</strong></th>
+              <th><strong>WavMark</strong></th>
+              <th><strong>WAKE(proposed)</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Origin Audio</strong></td>
+              <td>
+                <img src="static/images/fig_m/1/1.jpg" alt="Figure" />
+                <audio controls=""><source src="static/audio_sample/demo/multi/2/origin.wav" type="audio/wav"></audio>
+              </td>
+              <td>
+                <img src="static/images/fig_m/1/1.jpg" alt="Figure" />
+                <audio controls=""><source src="static/audio_sample/demo/multi/2/origin.wav" type="audio/wav"></audio>
+              </td>
+              <td>
+                <img src="static/images/fig_m/1/1.jpg" alt="Figure" />
+                <audio controls=""><source src="static/audio_sample/demo/multi/2/origin.wav" type="audio/wav"></audio>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Watermark 1 time</strong></td>
+              <td>
+                <img src="static/images/fig_m/2/1.jpg" alt="Figure" />
+                <audio controls=""><source src="static/audio_sample/demo/multi/2/1/1.wav" type="audio/wav"></audio>
+              </td>
+              <td>
+                <img src="static/images/fig_m/2/2.jpg" alt="Figure" />
+                <audio controls=""><source src="static/audio_sample/demo/multi/2/1/2.wav" type="audio/wav"></audio>
+              </td>
+              <td>
+                <img src="static/images/fig_m/2/3.jpg" alt="Figure" />
+                <audio controls=""><source src="static/audio_sample/demo/multi/2/1/3.wav" type="audio/wav"></audio>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Watermark 2 times</strong></td>
+              <td>
+                <img src="static/images/fig_m/3/1.jpg" alt="Figure" />
+                <audio controls=""><source src="static/audio_sample/demo/multi/2/2/1.wav" type="audio/wav"></audio>
+              </td>
+              <td>
+                <img src="static/images/fig_m/3/2.jpg" alt="Figure" />
+                <audio controls=""><source src="static/audio_sample/demo/multi/2/2/2.wav" type="audio/wav"></audio>
+              </td>
+              <td>
+                <img src="static/images/fig_m/3/3.jpg" alt="Figure" />
+                <audio controls=""><source src="static/audio_sample/demo/multi/2/2/3.wav" type="audio/wav"></audio>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Watermark 5 times</strong></td>
+              <td>
+                <img src="static/images/fig_m/6/1.jpg" alt="Figure" />
+                <audio controls=""><source src="static/audio_sample/demo/multi/2/5/1.wav" type="audio/wav"></audio>
+              </td>
+              <td>
+                <img src="static/images/fig_m/6/2.jpg" alt="Figure" />
+                <audio controls=""><source src="static/audio_sample/demo/multi/2/5/2.wav" type="audio/wav"></audio>
+              </td>
+              <td>
+                <img src="static/images/fig_m/6/3.jpg" alt="Figure" />
+                <audio controls=""><source src="static/audio_sample/demo/multi/2/5/3.wav" type="audio/wav"></audio>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Watermark 10 times</strong></td>
+              <td>
+                <img src="static/images/fig_m/11/1.jpg" alt="Figure" />
+                <audio controls=""><source src="static/audio_sample/demo/multi/2/10/1.wav" type="audio/wav"></audio>
+              </td>
+              <td>
+                <img src="static/images/fig_m/11/2.jpg" alt="Figure" />
+                <audio controls=""><source src="static/audio_sample/demo/multi/2/10/2.wav" type="audio/wav"></audio>
+              </td>
+              <td>
+                <img src="static/images/fig_m/11/3.jpg" alt="Figure" />
+                <audio controls=""><source src="static/audio_sample/demo/multi/2/10/3.wav" type="audio/wav"></audio>
+              </td>
+            </tr>
+            
+
+
+          </tbody>
+        </table>
+      </div>
+              <div class="columns is-centered has-text-centered">
+                <div class="column is-four-fifths">
+                  <a href="#toc" class="button is-primary">Go Back to Table of Contents</a>
+                </div>
+              </div>
+    </div>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container is-fluid">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Licenses</h2>
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license"
+                                                href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative
+            Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
+          </p>
+          <p>
+            Website source code based on the <a
+            href="https://github.com/nerfies/nerfies.github.io">Nerfies</a> project page.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
