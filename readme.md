@@ -1,4 +1,4 @@
-This repository contains the complete code for the InterSpeech 2025 paper, "**WAKE: Watermarking Audio with Key Enrichment**."
+This repository contains the complete code for "**WAKE: Watermarking Audio with Key Enrichment**."
 
 **Environment Setup:**
 
